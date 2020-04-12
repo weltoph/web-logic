@@ -1,0 +1,19 @@
+{
+  "name": "web-logic",
+  "version": "1.0.0",
+  "description": "Library for propositional and predicate logic",
+  "private": true,
+  "main": "src/logic.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "author": "Christoph Welzel",
+  "license": "MIT",
+  "devDependencies": {
+    "pegjs": "^0.10.0",
+    "pegjs-loader": "^0.5.6",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}
