@@ -1,8 +1,8 @@
 var _FormulaType = {
-  CONJUNCTION: 0,
-  DISJUNCTION: 1,
-  IMPLICATION: 2,
-  BIIMPLICATION: 3,
+  BIIMPLICATION: 0,
+  IMPLICATION: 1,
+  DISJUNCTION: 2,
+  CONJUNCTION: 3,
   NEGATION: 4,
   UNIVERSAL: 5,
   EXISTENTIAL: 6,
@@ -109,7 +109,7 @@ function Formula(type, first, second) {
     if(second !== undefined) {
       console.warn(`Dismissing second argument ${second} for unary formula ${strRep}`);
     }
-    this.inner = first;
+    this.innerFormula = first;
   } else if(FormulaType.atomic.includes(this.type)) {
     if(second !== undefined) {
       console.warn(`Dismissing second argument ${second} for atomic formula`);
@@ -127,9 +127,55 @@ function Predicate(name, variableList) {
   this.variableList = variableList;
 }
 
+function stringifyFormula(formula) {
+  if(formula.type === FormulaType.ATOM) {
+    const atom = formula.atom;
+    var result = atom.name;
+    if(atom.variableList) {
+      var stringList = [];
+      for(const element of atom.variableList) {
+        stringList.append(element.name);
+      }
+      result += "(" + stringList.join(", ") + ")";
+    }
+    return result;
+  } else if(FormulaType.binary.includes(formula.type)) {
+    var leftStr = stringifyFormula(formula.left);
+    var rightStr = stringifyFormula(formula.right);
+    if(FormulaType.binary.includes(formula.left.type) && formula.left.type < formula.type) {
+      leftStr = "(" + leftStr + ")";
+    }
+    if(FormulaType.binary.includes(formula.right.type) && formula.right.type < formula.type) {
+      rightStr = "(" + rightStr + ")";
+    }
+    return leftStr + FormulaType.getFormulaConnective(formula.type) + rightStr;
+  } else if(formula.type === FormulaType.NEGATION) {
+    var innerStr = stringifyFormula(formula.innerFormula);
+    if(FormulaType.binary.includes(formula.innerFormula.type)) {
+      innerStr = "(" + innerStr + ")";
+    }
+    return "~" + innerStr;
+  } else if(FormulaType.quantification.includes(formula.type)) {
+    var innerStr = stringifyFormula(formula.innerFormula);
+    if(FormulaType.binary.includes(formula.innerFormula.type)) {
+      innerStr = "(" + innerStr + ")";
+    }
+    var quantification;
+    if(formula.type === FormulaType.UNIVERSAL) {
+      quantification = "![" + formula.quantifiedVariable.name + "]:";
+    } else if(formula.type === FormulaType.EXISTENTIAL) {
+      quantification = "?[" + formula.quantifiedVariable.name + "]:";
+    } else {
+      throw "unexpected quantification";
+    }
+    return quantification + innerStr;
+  }
+}
+
 module.exports = {
   FormulaType: FormulaType,
   Formula: Formula,
   Variable: Variable,
   Predicate: Predicate,
+  stringifyFormula: stringifyFormula
 };

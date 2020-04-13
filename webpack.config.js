@@ -1,10 +1,14 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: {
+    truthtable: './src/truthtable.js',
+    syntaxtree: './src/syntaxtree.js',
+    normalform: './src/normalform.js'
+  },
   mode: "development",
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
   module: {
