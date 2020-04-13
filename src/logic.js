@@ -127,6 +127,19 @@ function Predicate(name, variableList) {
   this.variableList = variableList;
 }
 
+function getAtoms(formula) {
+  if(formula.type === FormulaType.ATOM) {
+    return [formula];
+  } else if(FormulaType.binary.includes(formula.type)) {
+    const leftAtoms = getAtoms(formula.left);
+    const rightAtoms = getAtoms(formula.right);
+    return leftAtoms.concat(rightAtoms);
+  } else if(FormulaType.unary.includes(formula.type)
+            || FormulaType.quantification.includes(formula.type)) {
+    return getAtoms(self.innerFormula);
+  }
+}
+
 function stringifyFormula(formula) {
   if(formula.type === FormulaType.ATOM) {
     const atom = formula.atom;
@@ -177,5 +190,6 @@ module.exports = {
   Formula: Formula,
   Variable: Variable,
   Predicate: Predicate,
-  stringifyFormula: stringifyFormula
+  stringifyFormula: stringifyFormula,
+  getAtoms: getAtoms
 };
