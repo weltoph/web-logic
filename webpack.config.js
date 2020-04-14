@@ -1,19 +1,49 @@
 const path = require('path');
 
-module.exports = {
-  entry: {
-    truthtable: './src/truthtable.js',
-    syntaxtree: './src/syntaxtree.js',
-    normalform: './src/normalform.js'
-  },
-  mode: "development",
-  output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
-  module: {
-    rules: [
-      { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
+
+module.exports = [
+  {
+    entry: './src/truthtable.js',
+    mode: "production",
+    output: {
+      filename: 'truthtable.bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+    },
+    module: {
+      rules: [
+        { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
+      ]
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './src/truthtable.html',
+        filename: './depoyable/truthtable.html',
+        inlineSource: '.(js|css)$'
+      }),
+      new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
+    ]
+  }, {
+    entry: './src/syntaxtree.js',
+    mode: "production",
+    output: {
+      filename: 'syntaxtree.bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+    },
+    module: {
+      rules: [
+        { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
+      ]
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './src/syntaxtree.html',
+        filename: './deployable/syntaxtree.html',
+        inlineSource: '.(js|css)$'
+      }),
+      new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
     ]
   },
-};
+];

@@ -140,9 +140,9 @@ function onConstructionButton() {
     resultDiv.appendChild(resultingTable);
   } else if(result.type === parsers.ParseResult.FAILURE) {
     const span = document.createElement("span");
-    const innerText = document.createTextNode(result.message);
+    const innerText = `${result.message} Check ${result.location.start.column}-th character.`
     resultDiv.classList.add("failure");
-    resultDiv.appendChild(innerText);
+    resultDiv.appendChild(document.createTextNode(innerText));
     console.warn(result);
   } else {
     /* */
