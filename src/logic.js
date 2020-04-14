@@ -148,6 +148,7 @@ function evaluate(formula, interpretation) {
     }
   } else if(formula.type === FormulaType.NEGATION) {
     const innerEvaluation = evaluate(formula.innerFormula, interpretation);
+    return !innerEvaluation;
   } else if(FormulaType.quantification.includes(formula.type)) {
     const quantifiedInterpretations = interpretation.quantifyVariable(formula.quantifiedVariable);
     for(const derivedInterpretation of quantifiedInterpretations) {
@@ -189,7 +190,7 @@ function getAtoms(formula) {
     return leftAtoms.concat(rightAtoms);
   } else if(FormulaType.unary.includes(formula.type)
             || FormulaType.quantification.includes(formula.type)) {
-    return getAtoms(self.innerFormula);
+    return getAtoms(formula.innerFormula);
   }
 }
 

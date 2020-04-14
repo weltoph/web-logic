@@ -165,14 +165,13 @@ function constructRow(formula) {
     }
     return leftRow.concat(
       [{ type: RowType.SUBFORMULA, subFormula: formula}]).concat(rightRow);
-  } else if(logic.FormulaType.unary.includes(formula.type)
-            || logic.FormulaType.quantification.includes(formula.type)) {
+  } else if(logic.FormulaType.unary.includes(formula.type)) {
     var innerRow = constructRow(formula.innerFormula);
     if(logic.FormulaType.needsBrackets(formula, formula.innerFormula)) {
       innerRow = [{ type: RowType.OPENBRACKET }].concat(innerRow).concat(
         [{ type: RowType.CLOSEBRACKET }]);
     }
-    return innerRow;
+    return [{ type: RowType.SUBFORMULA, subFormula: formula }].concat(innerRow);
   }
   throw "unable to construct row for formula";
 }

@@ -45,5 +45,25 @@ module.exports = [
       }),
       new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
     ]
+  }, {
+    entry: './src/fo-graph.js',
+    mode: "development",
+    output: {
+      filename: 'fo-graph.bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+    },
+    module: {
+      rules: [
+        { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
+      ]
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './src/fo-graph.html',
+        filename: './deployable/fo-graph.html',
+        inlineSource: '.(js|css)$'
+      }),
+      new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
+    ]
   },
 ];
