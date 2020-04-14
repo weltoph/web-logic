@@ -20,7 +20,7 @@ module.exports = [
     plugins: [
       new HtmlWebpackPlugin({
         template: './src/truthtable.html',
-        filename: './depoyable/truthtable.html',
+        filename: './deployable/truthtable.html',
         inlineSource: '.(js|css)$'
       }),
       new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
