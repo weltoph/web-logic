@@ -10,7 +10,7 @@ conjunction = f:negation ws "&" ws s:conjunction { return new logic.Formula(logi
 negation = "~" ws inner:negation { return new logic.Formula(logic.FormulaType.NEGATION, inner); }
             / bottom:atom { return bottom; }
 
-variable = ws name:[a-zA-Z]+ ws { return new logic.Variable(name); }
+variable = ws name:[a-zA-Z]+ ws { return new logic.Formula(logic.FormulaType.ATOM, name.toString()); }
 variableList = ws f:variable ws "," ws r:variableList{ return [f].concat(r); }
              / ws l:variable ws { return [l] };
 
@@ -20,7 +20,7 @@ atom = alone:predicate { return alone; }
      / alone:quantification { return alone; }
      / "(" ws alone:formula ws ")" { return alone; }
 
-predicate = name:[a-zA-Z]+ "(" ws variableList:variableList ws ")" { return new logic.Formula(logic.FormulaType.ATOM, new logic.Predicate(name, variableList)); }
+predicate = name:[a-zA-Z]+ "(" ws variableList:variableList ws ")" { return new logic.Formula(logic.FormulaType.ATOM, name, variableList); }
 quantification = "!" ws "[" ws variableList:variableList ws "]" ws ":" inner:negation {
                     var f = null;
                     for(const quantifiedVariable of variableList.reverse()) {

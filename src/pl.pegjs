@@ -10,12 +10,12 @@ conjunction = f:negation ws "&" ws s:conjunction { return new logic.Formula(logi
 negation = "~" ws inner:negation { return new logic.Formula(logic.FormulaType.NEGATION, inner); }
             / bottom:atom { return bottom; }
 
-variable = ws name:[a-zA-Z]+ ws { return new logic.Variable(name); }
+variable = ws name:[a-zA-Z]+ ws {  return new logic.Formula(logic.FormulaType.ATOM, name.join("")); }
 variableList = ws f:variable ws "," ws r:variableList{ return [f].concat(r); }
              / ws l:variable ws { return [l] };
 
 ws = [" "]*
 
 
-atom = variable:variable { return new logic.Formula(logic.FormulaType.ATOM, variable); }
+atom = variable:variable { return variable; }
      / "(" ws alone:formula ws ")" { return alone; }

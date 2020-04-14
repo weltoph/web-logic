@@ -1,7 +1,36 @@
 <!doctype html>
 <html>
   <style>
+table {
+  border-collapse: collapse;
+}
 
+#firstRow th {
+  border-bottom:1px solid transparent;
+}
+
+
+#firstRow th {
+  border-bottom:1px solid black;
+}
+
+.lastAtomCell {
+  border-right:1px solid black;
+}
+
+td {
+  text-align: center;
+}
+
+th {
+  text-align: center;
+}
+
+table th,td {
+  padding: 4px;
+}
+
+  </style>
   </style>
 
   <head>
@@ -12,10 +41,12 @@
     <div id="input">
       <label form="input" for="formulaTextInput">Formula:</label>
       <input type="text" id="formulaTextInput" size="80"></input>
-      <button id="formulaButtonInput" onclick="onConstructionButton();">Construct truthtable</input>
+      <button id="formulaButtonInput">Construct truthtable</input>
     </div>
-    <div id="result">
-    </div>
+    <center>
+      <div id="result">
+      </div>
+    </center>
   </body>
   <script src="./truthtable.bundle.js"></script>
 </html>

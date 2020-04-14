@@ -50,6 +50,20 @@ var _FormulaType = {
       default:
         return "<unknown>";
     }
+  },
+  needsBrackets: function(topFormula, subFormula) {
+    if( (subFormula.type === this.NEGATION)
+      ||(subFormula.type === this.UNIVERSAL)
+      ||(subFormula.type === this.EXISTENTIAL)
+      ||(subFormula.type === this.ATOM)) {
+      return false;
+    } else if((topFormula.type === this.NEGATION)
+            ||(topFormula.type === this.UNIVERSAL)
+            ||(topFormula.type === this.EXISTENTIAL)) {
+      return true;
+    } else {
+      return subFormula.type < topFormula.type;
+    }
   }
 }
 
@@ -111,20 +125,59 @@ function Formula(type, first, second) {
     }
     this.innerFormula = first;
   } else if(FormulaType.atomic.includes(this.type)) {
-    if(second !== undefined) {
-      console.warn(`Dismissing second argument ${second} for atomic formula`);
+    this.name = first;
+    if(second) {
+      this.variableList = second;
     }
-    this.atom = first;
   }
 }
 
-function Variable(name) {
-  this.name = name;
+function evaluate(formula, interpretation) {
+  if(FormulaType.binary.includes(formula.type)) {
+    const leftEvaluation = evaluate(formula.left, interpretation);
+    const rightEvaluation = evaluate(formula.right, interpretation);
+    if(formula.type === FormulaType.BIIMPLICATION) {
+      return ((leftEvaluation && rightEvaluation)
+              || (!leftEvaluation && !rightEvaluation));
+    } else if(formula.type === FormulaType.IMPLICATION) {
+      return (!leftEvaluation || rightEvaluation);
+    } else if(formula.type === FormulaType.DISJUNCTION) {
+      return (leftEvaluation || rightEvaluation);
+    } else if(formula.type === FormulaType.CONJUNCTION) {
+      return (leftEvaluation && rightEvaluation);
+    }
+  } else if(formula.type === FormulaType.NEGATION) {
+    const innerEvaluation = evaluate(formula.innerFormula, interpretation);
+  } else if(FormulaType.quantification.includes(formula.type)) {
+    const quantifiedInterpretations = interpretation.quantifyVariable(formula.quantifiedVariable);
+    for(const derivedInterpretation of quantifiedInterpretations) {
+      const quantifiedResult = evaluate(formula.innerFormula, derivedInterpretation);
+      if(formula.type === FormulaType.UNIVERSAL && !quantifiedResult) {
+        return false;
+      } else if(formula.type === FormulaType.EXISTENTIAL && quantifiedResult) {
+        return true;
+      } else {
+        continue;
+      }
+    }
+    if(formula.type === FormulaType.UNIVERSAL) {
+      return true;
+    } else if(formula.type === FormulaType.UNIVERSAL) {
+      return false;
+    } else {
+      throw "unexpected formula type";
+    }
+  } else if(formula.type === FormulaType.ATOM) {
+    return interpretation.evaluateAtom(formula);
+  }
 }
 
-function Predicate(name, variableList) {
-  this.name;
-  this.variableList = variableList;
+function plInterpretation(trueVariables) {
+  this.trueVariables = trueVariables;
+  this.evaluateAtom = function(variable) {
+    return (trueVariables.includes(variable)
+      || trueVariables.includes(variable.name));
+  }
 }
 
 function getAtoms(formula) {
@@ -140,56 +193,10 @@ function getAtoms(formula) {
   }
 }
 
-function stringifyFormula(formula) {
-  if(formula.type === FormulaType.ATOM) {
-    const atom = formula.atom;
-    var result = atom.name;
-    if(atom.variableList) {
-      var stringList = [];
-      for(const element of atom.variableList) {
-        stringList.append(element.name);
-      }
-      result += "(" + stringList.join(", ") + ")";
-    }
-    return result;
-  } else if(FormulaType.binary.includes(formula.type)) {
-    var leftStr = stringifyFormula(formula.left);
-    var rightStr = stringifyFormula(formula.right);
-    if(FormulaType.binary.includes(formula.left.type) && formula.left.type < formula.type) {
-      leftStr = "(" + leftStr + ")";
-    }
-    if(FormulaType.binary.includes(formula.right.type) && formula.right.type < formula.type) {
-      rightStr = "(" + rightStr + ")";
-    }
-    return leftStr + FormulaType.getFormulaConnective(formula.type) + rightStr;
-  } else if(formula.type === FormulaType.NEGATION) {
-    var innerStr = stringifyFormula(formula.innerFormula);
-    if(FormulaType.binary.includes(formula.innerFormula.type)) {
-      innerStr = "(" + innerStr + ")";
-    }
-    return "~" + innerStr;
-  } else if(FormulaType.quantification.includes(formula.type)) {
-    var innerStr = stringifyFormula(formula.innerFormula);
-    if(FormulaType.binary.includes(formula.innerFormula.type)) {
-      innerStr = "(" + innerStr + ")";
-    }
-    var quantification;
-    if(formula.type === FormulaType.UNIVERSAL) {
-      quantification = "![" + formula.quantifiedVariable.name + "]:";
-    } else if(formula.type === FormulaType.EXISTENTIAL) {
-      quantification = "?[" + formula.quantifiedVariable.name + "]:";
-    } else {
-      throw "unexpected quantification";
-    }
-    return quantification + innerStr;
-  }
-}
-
 module.exports = {
   FormulaType: FormulaType,
   Formula: Formula,
-  Variable: Variable,
-  Predicate: Predicate,
-  stringifyFormula: stringifyFormula,
-  getAtoms: getAtoms
+  getAtoms: getAtoms,
+  evaluate: evaluate,
+  plInterpretation: plInterpretation
 };
