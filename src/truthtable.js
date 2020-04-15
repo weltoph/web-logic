@@ -147,7 +147,7 @@ function onConstructionButton() {
   } else {
     /* */
   }
-};
+}
 
 function constructRow(formula) {
   if(formula.type === logic.FormulaType.ATOM) {

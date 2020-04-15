@@ -163,10 +163,13 @@ function evaluate(formula, interpretation) {
     }
     if(formula.type === FormulaType.UNIVERSAL) {
       return true;
-    } else if(formula.type === FormulaType.UNIVERSAL) {
+    } else if(formula.type === FormulaType.EXISTENTIAL) {
       return false;
     } else {
-      throw "unexpected formula type";
+      console.warn(formula);
+      throw {
+        message: "unexpected formula type"
+      }
     }
   } else if(formula.type === FormulaType.ATOM) {
     return interpretation.evaluateAtom(formula);
