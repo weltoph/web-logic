@@ -64,6 +64,19 @@ function createNewNode(x, y) {
     strokewidth: 2
   });
 
+  const newGuard = new Konva.Circle({
+    x: x,
+    y: y,
+    radius: 46,
+    stroke: 'transparent',
+    fill: 'transparent',
+    strokewidth: 0
+  });
+
+  newGuard.on("dblclick", function(event) {
+    event.cancelBubble = true;
+  });
+
   newCircle.on("dblclick", function(event) {
     event.cancelBubble = true;
   });
@@ -78,6 +91,9 @@ function createNewNode(x, y) {
 
   universe.push(newCircle);
   layer.add(newCircle);
+  layer.add(newGuard);
+  newGuard.moveToTop();
+  newCircle.moveToTop();
 
   layer.draw();
 }
