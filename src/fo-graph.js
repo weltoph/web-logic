@@ -5,7 +5,7 @@ const logic = require("./logic.js");
 const stage = new Konva.Stage({
   container: "input",
   width: window.innerWidth,
-  height: window.innerHeight - 400,
+  height: window.innerHeight - 600,
   visible: true,
 });
 

@@ -1,2 +1,4 @@
-dist/bundle.js: $(wildcard src/*) webpack.config.js
+.PHONY: main
+
+main: $(wildcard src/*) $(wildcard dist/*.html) webpack.config.js
 	npm run build

@@ -1,9 +1,5 @@
 const path = require('path');
 
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
-const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
-
 module.exports = [
   {
     entry: './src/truthtable.js',
@@ -17,14 +13,6 @@ module.exports = [
         { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
       ]
     },
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: './src/truthtable.html',
-        filename: './deployable/truthtable.html',
-        inlineSource: '.(js|css)$'
-      }),
-      new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
-    ]
   }, {
     entry: './src/syntaxtree.js',
     mode: "production",
@@ -37,17 +25,9 @@ module.exports = [
         { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
       ]
     },
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: './src/syntaxtree.html',
-        filename: './deployable/syntaxtree.html',
-        inlineSource: '.(js|css)$'
-      }),
-      new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
-    ]
   }, {
     entry: './src/fo-graph.js',
-    mode: "development",
+    mode: "production",
     output: {
       filename: 'fo-graph.bundle.js',
       path: path.resolve(__dirname, 'dist'),
@@ -57,13 +37,5 @@ module.exports = [
         { test: /\.pegjs$/, use: 'pegjs-loader?dependencies={"logic":"./logic.js"}' }
       ]
     },
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: './src/fo-graph.html',
-        filename: './deployable/fo-graph.html',
-        inlineSource: '.(js|css)$'
-      }),
-      new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin)
-    ]
   },
 ];
