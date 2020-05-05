@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Truthtable</title>
+  </head>
+
+  <body>
+    <div id="instructions">
+      <p>
+        The Boolean connectives in descending order of precedence are
+        <ul>
+          <li><span class="inlineCode">~</span> for negation,</li>
+          <li><span class="inlineCode">&amp;</span> for conjunction,</li>
+          <li><span class="inlineCode">|</span> for disjunction,</li>
+          <li><span class="inlineCode">=&gt;</span> for implication, and</li>
+          <li><span class="inlineCode">&lt;=&gt;</span> for biimplication.</li>
+        </ul>
+        Some examples for formulae are
+        <ul>
+          <li><span class="inlineCode">~A =&gt; B | (C &lt;=&gt; A)</span>
+            which is equivalent to
+            <span class="inlineCode">((~A) =&gt; (B | (C &lt;=&gt; A)))</span>,</li>
+          <li><span class="inlineCode">A &amp; B &amp; C =&gt; D</span>
+            which is an example of a Horn-formula and equivalent to
+            <span class="inlineCode">(A &amp; (B &amp; C)) =&gt; D</span>.
+        </ul>
+      </p>
+    </div>
+    <center>
+      <div id="input">
+        <label form="input" for="formulaTextInput">Formula:</label>
+        <input type="text" id="formulaTextInput" size="80"></input>
+        <button id="formulaButtonInput">Construct truthtable</input>
+      </div>
+      <div id="result">
+      </div>
+    </center>
+  </body>
+  <script src="truthtable.bundle.js"></script>
+</html>

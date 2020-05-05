@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>Graph evaluation</title>
+  </head>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <body>
+    <div id="instructions">
+      Create a simple colored graph by
+      <ul>
+        <li>double clicking the canvas to create a node,</li>
+        <li>clicking a node cycles through the available color states red,
+          blue, green and uncolored, and</li>
+        <li>dragging from one node to another to create an edge.</li>
+      </ul>
+
+      Give a first-order sentence in the text box below which you can then
+      evaluate on your graph. The signature is
+      <ul>
+        <li><span class="inlineCode">E/2</span> which is instantiated with the
+          edge relation,</li>
+        <li><span class="inlineCode">=/2</span> which is equality (note that it
+          is used inline, i.e. <span class="inlineCode">x = y</span>),</li>
+        <li><span class="inlineCode">Red/1</span> which is the set of all red
+          nodes,</li>
+        <li><span class="inlineCode">Blue/1</span> which is the set of all blue
+          nodes, and</li>
+        <li><span class="inlineCode">Green/1</span> which is the set of all
+          green nodes.</li>
+      </ul>
+      Universal and existential quantifications are written as
+      <span class="inlineCode">!x. (...)</span> and
+      <span class="inlineCode">?x. (...)</span> respectively. Examples are
+      <ul>
+        <li>
+          <span class="inlineCode">
+            ? b . ( Blue(b) & ! o . ( ~ o = b => E(o, b) ) )
+          </span>
+          to describe that there is one blue node which is adjacent to all
+          others, and
+        </li>
+        <li>
+          <span class="inlineCode">
+            ! x . ( Blue(x) | ? y . (E(x, y) & Blue(y)))
+          </span>
+          to state that every node is either blue or adjacent to a blue node.
+        </li>
+      </ul>
+    </div>
+    <center>
+      <div id="input" style="border: 1px solid black;">
+      </div>
+      <div id="formula">
+        <label form="input" for="formulaTextInput">Formula:</label>
+        <input type="text" id="formulaTextInput" size="80"></input>
+        <button id="formulaButtonInput">Evaluate formula</input>
+      </div>
+      <div id="result">
+      </div>
+    </center>
+  </body>
+  <script src="fo-graph.bundle.js"></script>
+</html>
