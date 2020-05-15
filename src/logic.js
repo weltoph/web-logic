@@ -1,178 +1,388 @@
-var _FormulaType = {
-  BIIMPLICATION: 0,
-  IMPLICATION: 1,
-  DISJUNCTION: 2,
-  CONJUNCTION: 3,
-  NEGATION: 4,
-  UNIVERSAL: 5,
-  EXISTENTIAL: 6,
-  ATOM: 7,
-  getStringRepresentation: function(element) {
-    switch(element) {
-      case this.CONJUNCTION:
-        return "<conjunction>";
-      case this.DISJUNCTION:
-        return "<disjunction>";
-      case this.IMPLICATION:
-        return "<implication>";
-      case this.BIIMPLICATION:
-        return "<biimplication>";
-      case this.NEGATION:
-        return "<negation>";
-      case this.UNIVERSAL:
-        return "<universal-quantification>";
-      case this.EXISTENTIAL:
-        return "<existential-quantification>";
-      case this.ATOM:
-        return "<atom>";
-      default:
-        return "<unknown>";
-    }
-  },
-  getFormulaConnective: function(element) {
-    switch(element) {
-      case this.CONJUNCTION:
-        return "&";
-      case this.DISJUNCTION:
-        return "|";
-      case this.IMPLICATION:
-        return "=>";
-      case this.BIIMPLICATION:
-        return "<=>";
-      case this.NEGATION:
-        return "~";
-      case this.UNIVERSAL:
-        return "!";
-      case this.EXISTENTIAL:
-        return "?";
-      case this.ATOM:
-        return "";
-      default:
-        return "<unknown>";
-    }
-  },
-  needsBrackets: function(topFormula, subFormula) {
-    if( (subFormula.type === this.NEGATION)
-      ||(subFormula.type === this.UNIVERSAL)
-      ||(subFormula.type === this.EXISTENTIAL)
-      ||(subFormula.type === this.ATOM)) {
-      return false;
-    } else if((topFormula.type === this.NEGATION)
-            ||(topFormula.type === this.UNIVERSAL)
-            ||(topFormula.type === this.EXISTENTIAL)) {
-      return true;
+class Variable {
+  name;
+
+  constructor(name) {
+    this.name = name;
+  }
+
+  isEqualTo(other) {
+    if(other instanceof Variable) {
+      return this.name === other.name;
     } else {
-      return subFormula.type < topFormula.type;
+      return false;
     }
+  }
+
+  toString() {
+    return this.name;
   }
 }
 
-_FormulaType.values = [
-  _FormulaType.CONJUNCTION,
-  _FormulaType.DISJUNCTION,
-  _FormulaType.IMPLICATION,
-  _FormulaType.ATOM,
-  _FormulaType.BIIMPLICATION,
-  _FormulaType.NEGATION,
-  _FormulaType.UNIVERSAL,
-  _FormulaType.EXISTENTIAL
-];
-
-_FormulaType.binary = [
-  _FormulaType.CONJUNCTION,
-  _FormulaType.DISJUNCTION,
-  _FormulaType.IMPLICATION,
-  _FormulaType.BIIMPLICATION
-];
-
-_FormulaType.quantification = [
-  _FormulaType.UNIVERSAL,
-  _FormulaType.EXISTENTIAL
-];
-
-_FormulaType.unary = [
-  _FormulaType.NEGATION
-];
-
-_FormulaType.atomic = [
-  _FormulaType.ATOM
-];
-
-const FormulaType = _FormulaType;
-
-function Formula(type, first, second) {
-  this.type = type;
-  const strRep = FormulaType.getStringRepresentation(this.type);
-  if(FormulaType.binary.includes(this.type)) {
-    if(first === undefined || second === undefined) {
-      throw {
-        message: `Cannot construct binary formula ${strRep} with undefined branches`
-      };
+class Model {
+  constructor() {
+    if(this.constructor == Model) {
+      throw new Error("Cannot instantiate abstract Model.");
     }
-    this.left = first;
-    this.right = second;
-  } else if(FormulaType.quantification.includes(this.type)) {
-    if(first === undefined || second === undefined) {
-      throw {
-        message: `Cannot construct quantification ${strRep} with undefined variable or undefined formula`
-      };
-    }
-    this.quantifiedVariable = first;
-    this.innerFormula = second;
-  } else if(FormulaType.unary.includes(this.type)) {
-    if(second !== undefined) {
-      console.warn(`Dismissing second argument ${second} for unary formula ${strRep}`);
-    }
-    this.innerFormula = first;
-  } else if(FormulaType.atomic.includes(this.type)) {
-    this.name = first;
-    if(second) {
-      this.variableList = second;
-    }
+  }
+
+  /* necessary */
+  evaluateAtom(atom) {
+    throw new Error("Cannot call abstract method.");
+  }
+
+  /* optional */
+  quantifyVariable(variable) {
+    throw new Error("Cannot call abstract method.");
   }
 }
 
-function evaluate(formula, interpretation) {
-  if(FormulaType.binary.includes(formula.type)) {
-    const leftEvaluation = evaluate(formula.left, interpretation);
-    const rightEvaluation = evaluate(formula.right, interpretation);
-    if(formula.type === FormulaType.BIIMPLICATION) {
-      return ((leftEvaluation && rightEvaluation)
-              || (!leftEvaluation && !rightEvaluation));
-    } else if(formula.type === FormulaType.IMPLICATION) {
-      return (!leftEvaluation || rightEvaluation);
-    } else if(formula.type === FormulaType.DISJUNCTION) {
-      return (leftEvaluation || rightEvaluation);
-    } else if(formula.type === FormulaType.CONJUNCTION) {
-      return (leftEvaluation && rightEvaluation);
+class Formula {
+  precedence = undefined;
+
+  constructor() {
+    if(this.constructor == Formula) {
+      throw new Error("Cannot instantiate abstract Formula.");
     }
-  } else if(formula.type === FormulaType.NEGATION) {
-    const innerEvaluation = evaluate(formula.innerFormula, interpretation);
-    return !innerEvaluation;
-  } else if(FormulaType.quantification.includes(formula.type)) {
-    const quantifiedInterpretations = interpretation.quantifyVariable(formula.quantifiedVariable);
-    for(const derivedInterpretation of quantifiedInterpretations) {
-      const quantifiedResult = evaluate(formula.innerFormula, derivedInterpretation);
-      if(formula.type === FormulaType.UNIVERSAL && !quantifiedResult) {
+  }
+
+  isEqualTo(other) {
+    throw new Error("Cannot call abstract method.");
+  }
+
+  evaluate(model) {
+    throw new Error("Cannot call abstract method.");
+  }
+
+  toString() {
+    throw new Error("Cannot call abstract method.");
+  }
+
+  getAtoms() {
+    throw new Error("Cannot call abstract method.");
+  }
+}
+
+class UnaryConnective extends Formula {
+  inner;
+
+  constructor(inner) {
+    super();
+    if(this.constructor == UnaryConnective) {
+      throw new Error("Cannot instantiate abstract UnaryConnective.");
+    }
+    if(!(inner instanceof Formula)) {
+      throw new Error("Requires inner argument to be a Formula.");
+    }
+    this.inner = inner;
+    this.precedence = 4;
+  }
+
+  requiresBracketsInner() {
+    return this.inner.precedence < this.precedence;
+  }
+
+  getAtoms() {
+    return this.inner.getAtoms();
+  }
+}
+
+class BinaryConnective extends Formula {
+  left;
+  right;
+
+  constructor(left, right) {
+    super();
+    if(this.constructor == BinaryConnective) {
+      throw new Error("Cannot instantiate abstract BinaryConnective.");
+    }
+    if(!(left instanceof Formula)) {
+      throw new Error("Requires left argument to be a Formula.");
+    }
+    if(!(right instanceof Formula)) {
+      throw new Error("Requires right argument to be a Formula.");
+    }
+    this.left = left;
+    this.right = right;
+  }
+
+  requiresBracketsLeft() {
+    return this.left.precedence < this.precedence;
+  }
+
+  requiresBracketsRight() {
+    return this.right.precedence < this.precedence;
+  }
+
+  isEqualTo(other) {
+    if(other instanceof this.constructor) {
+      return (this.left.isEqualTo(other.left)
+              && this.right.isEqualTo(other.right));
+    } else {
+      return false;
+    }
+  }
+
+  toString() {
+    if(this.requiresBracketsLeft()) {
+      const leftStr = "(" + this.left.toString() + ")";
+    } else {
+      const leftStr = this.left.toString();
+    }
+    if(this.requiresBracketsRight()) {
+      const rightStr = "(" + this.right.toString() + ")";
+    } else {
+      const rightStr = this.right.toString();
+    }
+    return leftStr + this.symbol + rightStr;
+  }
+
+  getAtoms() {
+    const leftAtoms = this.left.getAtoms();
+    const rightAtoms = this.right.getAtoms();
+    var result = [];
+    for(const atom of leftAtoms.concat(rightAtoms)) {
+      if(!result.filter(a => atom.isEqualTo(a)).length) {
+        result.push(atom);
+      }
+    }
+    return result;
+  }
+}
+
+class BiImplication extends BinaryConnective {
+  symbol = "<=>";
+  precedence = 0;
+
+  evaluate(model) {
+    const leftResult = this.left.evaluate(model);
+    const rightResult = this.right.evaluate(model);
+    return (leftResult && rightResult) || (!leftResult && !rightResult);
+  }
+
+}
+
+class Implication extends BinaryConnective {
+  symbol = "=>";
+  precedence = 1;
+
+  evaluate(model) {
+    const leftResult = this.left.evaluate(model);
+    const rightResult = this.right.evaluate(model);
+    return !leftResult || rightResult;
+  }
+}
+
+class Disjunction extends BinaryConnective {
+  symbol = "|";
+  precedence = 2;
+
+  evaluate(model) {
+    const leftResult = this.left.evaluate(model);
+    const rightResult = this.right.evaluate(model);
+    return leftResult || rightResult;
+  }
+}
+
+class Conjunction extends BinaryConnective {
+  symbol = "&";
+  precedence = 3;
+
+  evaluate(model) {
+    const leftResult = this.left.evaluate(model);
+    const rightResult = this.right.evaluate(model);
+    return leftResult && rightResult;
+  }
+}
+
+class Negation extends UnaryConnective {
+  evaluate(model) {
+    const innerResult = this.inner.evaluate(model);
+    return !innerResult;
+  }
+
+  isEqualTo(other) {
+    if(other instanceof this.constructor) {
+      return this.inner.isEqualTo(other.inner);
+    } else {
+      return false;
+    }
+  }
+
+  toString() {
+    if(this.requiresBracketsInner()) {
+      const innerStr = "(" + this.inner.toString() + ")";
+    } else {
+      const innerStr = this.inner.toString();
+    }
+    return "~" + innerStr;
+  }
+}
+
+
+class Universal extends UnaryConnective {
+  variable;
+
+  constructor(variable, inner) {
+    super(inner);
+    if(!(variable instanceof Variable)) {
+      throw new Error("Universal requires variable to be a Variable.");
+    }
+    this.variable = variable;
+  }
+
+  evaluate(model) {
+    for(const quantifiedModel of model.quantifyVariable(this.variable)) {
+      const quantificationResult = this.inner.evaluate(quantifiedModel);
+      if(!quantificationResult) {
         return false;
-      } else if(formula.type === FormulaType.EXISTENTIAL && quantifiedResult) {
-        return true;
-      } else {
-        continue;
       }
     }
-    if(formula.type === FormulaType.UNIVERSAL) {
-      return true;
-    } else if(formula.type === FormulaType.EXISTENTIAL) {
-      return false;
+    return true;
+  }
+
+  isEqualTo(other) {
+    if(other instanceof this.constructor) {
+      return (this.variable.isEqualTo(other.variable)
+        && this.inner.isEqualTo(other.inner));
     } else {
-      console.warn(formula);
-      throw {
-        message: "unexpected formula type"
+      return false;
+    }
+  }
+
+  toString() {
+    if(this.requiresBracketsInner()) {
+      const innerStr = "(" + this.inner.toString() + ")";
+    } else {
+      const innerStr = this.inner.toString();
+    }
+    const quantification = "! " + this.variable.name + ".";
+    return quantification + innerStr;
+  }
+}
+
+class Existential extends UnaryConnective {
+  variable;
+
+  constructor(variable, inner) {
+    super(inner);
+    if(!(variable instanceof Variable)) {
+      throw new Error("Existential requires variable to be a Variable.");
+    }
+    this.variable = variable;
+  }
+
+  evaluate(model) {
+    for(const quantifiedModel of model.quantifyVariable(this.variable)) {
+      const quantificationResult = this.inner.evaluate(quantifiedModel);
+      if(quantificationResult) {
+        return true;
       }
     }
-  } else if(formula.type === FormulaType.ATOM) {
-    return interpretation.evaluateAtom(formula);
+    return false;
+  }
+
+  isEqualTo(other) {
+    if(other instanceof this.constructor) {
+      return (this.variable.isEqualTo(other.variable)
+        && this.inner.isEqualTo(other.inner));
+    } else {
+      return false;
+    }
+  }
+
+  toString() {
+    if(this.requiresBracketsInner()) {
+      const innerStr = "(" + this.inner.toString() + ")";
+    } else {
+      const innerStr = this.inner.toString();
+    }
+    const quantification = "? " + this.variable.name + ".";
+    return quantification + innerStr;
+  }
+}
+
+class Atom extends Formula {
+  constructor() {
+    super();
+    if(this.constructor == Atom) {
+      throw new Error("Cannot instantiate abstract Atom.");
+    }
+    this.precedence = 5;
+  }
+
+  evaluate(model) {
+    return model.evaluateAtom(this);
+  }
+
+  getAtoms() {
+    return [this];
+  }
+}
+
+class Predicate extends Atom {
+  name;
+  variables;
+
+  constructor(name, variables) {
+    super();
+    this.name = name;
+    this.variables = this.variables;
+  }
+
+  toString() {
+    const variableList = this.variables.map(x => x.name).join(", ");
+    return this.name + "(" + variableList + ")";
+  }
+
+  isEqualTo(other) {
+    if(other instanceof Predicate && this.name === other.name
+      && this.variables.length === other.variables.length) {
+      reducer = (result, currentVar, currentIndex) => result |= currentVar.isEqualTo(other.variables[currentIndex])
+      return this.variables.reduce(reducer, true);
+    } else {
+      return false;
+    }
+  }
+}
+
+class Equality extends Atom {
+  leftVariable;
+  rightVariable;
+
+  constructor(leftVariable, rightVariable) {
+    this.leftVariable = leftVariable;
+    this.rightVariable = this.rightVariable;
+  }
+
+  toString() {
+    const leftVar = this.leftVariable.toString();
+    const rightVar = this.rightVariable.toString();
+    return leftVar + "=" + rightVar;
+  }
+
+  isEqualTo(other) {
+    if(other instanceof Equality) {
+      return this.leftVariable.isEqualTo(other.leftVariable) && this.rightVariable(other.rightVariable);
+    } else {
+      return false;
+    }
+  }
+}
+
+class Proposition extends Atom {
+  name;
+
+  constructor(name) {
+    super();
+    this.name = name;
+  }
+
+  toString() {
+    return this.name;
+  }
+
+  isEqualTo(other) {
+    return other instanceof Proposition && this.name == other.name;
   }
 }
 
@@ -184,23 +394,17 @@ function plInterpretation(trueVariables) {
   }
 }
 
-function getAtoms(formula) {
-  if(formula.type === FormulaType.ATOM) {
-    return [formula];
-  } else if(FormulaType.binary.includes(formula.type)) {
-    const leftAtoms = getAtoms(formula.left);
-    const rightAtoms = getAtoms(formula.right);
-    return leftAtoms.concat(rightAtoms);
-  } else if(FormulaType.unary.includes(formula.type)
-            || FormulaType.quantification.includes(formula.type)) {
-    return getAtoms(formula.innerFormula);
-  }
-}
-
 module.exports = {
-  FormulaType: FormulaType,
-  Formula: Formula,
-  getAtoms: getAtoms,
-  evaluate: evaluate,
-  plInterpretation: plInterpretation
+  Variable: Variable,
+  Model: Model,
+  BiImplication: BiImplication,
+  Implication: Implication,
+  Disjunction: Disjunction,
+  Conjunction: Conjunction,
+  Negation: Negation,
+  Universal: Universal,
+  Existential: Existential,
+  Predicate: Predicate,
+  Equality: Equality,
+  Proposition: Proposition
 };

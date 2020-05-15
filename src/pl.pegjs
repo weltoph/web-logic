@@ -1,18 +1,16 @@
 formula = ws inner:biimplication ws { return inner; }
-biimplication = f:implication ws "<=>" ws s:biimplication { return new logic.Formula(logic.FormulaType.BIIMPLICATION, f, s); }
+biimplication = f:implication ws "<=>" ws s:biimplication { return new logic.BiImplication(f, s); }
               / bottom:implication { return bottom; }
-implication = f:disjunction ws "=>" ws s:implication { return new logic.Formula(logic.FormulaType.IMPLICATION, f, s); }
+implication = f:disjunction ws "=>" ws s:implication { return new logic.Implication(f, s); }
             / bottom:disjunction { return bottom; }
-disjunction = f:conjunction ws "|" ws s:disjunction { return new logic.Formula(logic.FormulaType.DISJUNCTION, f, s); }
+disjunction = f:conjunction ws "|" ws s:disjunction { return new logic.Disjunction(f, s); }
             / bottom:conjunction { return bottom; }
-conjunction = f:negation ws "&" ws s:conjunction { return new logic.Formula(logic.FormulaType.CONJUNCTION, f, s); }
+conjunction = f:negation ws "&" ws s:conjunction { return new logic.Conjunction(f, s); }
             / bottom:negation { return bottom; }
-negation = "~" ws inner:negation { return new logic.Formula(logic.FormulaType.NEGATION, inner); }
+negation = "~" ws inner:negation { return new logic.Negation(inner); }
             / bottom:atom { return bottom; }
 
-variable = ws name:[a-zA-Z]+ ws {  return new logic.Formula(logic.FormulaType.ATOM, name.join("")); }
-variableList = ws f:variable ws "," ws r:variableList{ return [f].concat(r); }
-             / ws l:variable ws { return [l] };
+variable = ws name:[a-zA-Z]+ ws {  return new logic.Proposition(name.join("")); }
 
 ws = [" "]*
 
