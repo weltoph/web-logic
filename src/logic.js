@@ -326,7 +326,7 @@ class Predicate extends Atom {
   constructor(name, variables) {
     super();
     this.name = name;
-    this.variables = this.variables;
+    this.variables = variables;
   }
 
   toString() {
@@ -337,7 +337,7 @@ class Predicate extends Atom {
   isEqualTo(other) {
     if(other instanceof Predicate && this.name === other.name
       && this.variables.length === other.variables.length) {
-      reducer = (result, currentVar, currentIndex) => result |= currentVar.isEqualTo(other.variables[currentIndex])
+      const reducer = (result, currentVar, currentIndex) => result |= currentVar.isEqualTo(other.variables[currentIndex])
       return this.variables.reduce(reducer, true);
     } else {
       return false;
@@ -350,8 +350,9 @@ class Equality extends Atom {
   rightVariable;
 
   constructor(leftVariable, rightVariable) {
+    super();
     this.leftVariable = leftVariable;
-    this.rightVariable = this.rightVariable;
+    this.rightVariable = rightVariable;
   }
 
   toString() {
@@ -362,7 +363,7 @@ class Equality extends Atom {
 
   isEqualTo(other) {
     if(other instanceof Equality) {
-      return this.leftVariable.isEqualTo(other.leftVariable) && this.rightVariable(other.rightVariable);
+      return this.leftVariable.isEqualTo(other.leftVariable) && this.rightVariable.isEqualTo(other.rightVariable);
     } else {
       return false;
     }
@@ -386,11 +387,21 @@ class Proposition extends Atom {
   }
 }
 
-function plInterpretation(trueVariables) {
-  this.trueVariables = trueVariables;
-  this.evaluateAtom = function(variable) {
-    return (trueVariables.includes(variable)
-      || trueVariables.includes(variable.name));
+class PropositionValuation extends Model {
+  constructor(truePropositions) {
+    super();
+    for(const variable of truePropositions) {
+      if(!(variable instanceof Proposition)) {
+        throw new Error("PropositionValuation valuates Propositions.");
+      }
+    }
+    this.truePropositions = truePropositions;
+  }
+
+  evaluateAtom(atom) {
+    const occurences = this.truePropositions.filter(
+      proposition => proposition.isEqualTo(atom))
+    return occurences.length > 0
   }
 }
 
@@ -406,5 +417,6 @@ module.exports = {
   Existential: Existential,
   Predicate: Predicate,
   Equality: Equality,
-  Proposition: Proposition
+  Proposition: Proposition,
+  PropositionValuation: PropositionValuation
 };
