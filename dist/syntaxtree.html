@@ -1,44 +1,78 @@
 <!doctype html>
 <html>
-  <link rel="stylesheet" href="https://unpkg.com/treeflex/dist/css/treeflex.css">
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/treeflex/dist/css/treeflex.css" />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 
   <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Syntaxtree</title>
   </head>
 
   <body>
-    <div id="instructions">
-      <p>
-        The Boolean connectives in descending order of precedence are
-        <ul>
-          <li><span class="inlineCode">~</span> for negation,</li>
-          <li><span class="inlineCode">&amp;</span> for conjunction,</li>
-          <li><span class="inlineCode">|</span> for disjunction,</li>
-          <li><span class="inlineCode">=&gt;</span> for implication, and</li>
-          <li><span class="inlineCode">&lt;=&gt;</span> for biimplication.</li>
-        </ul>
-        Some examples for formulae are
-        <ul>
-          <li><span class="inlineCode">~A =&gt; B | (C &lt;=&gt; A)</span>
-            which is equivalent to
-            <span class="inlineCode">((~A) =&gt; (B | (C &lt;=&gt; A)))</span>,</li>
-          <li><span class="inlineCode">A &amp; B &amp; C =&gt; D</span>
-            which is an example of a Horn-formula and equivalent to
-            <span class="inlineCode">(A &amp; (B &amp; C)) =&gt; D</span>.
-        </ul>
-      </p>
+    <header>
+      <h1>Toph' SyntaxTree Hell</h1>
+    </header>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Instructions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="instructions">
+            <p>
+              The Boolean connectives in descending order of precedence are
+              <ul>
+                <li><span class="inlineCode">~</span> for negation,</li>
+                <li><span class="inlineCode">&amp;</span> for conjunction,</li>
+                <li><span class="inlineCode">|</span> for disjunction,</li>
+                <li><span class="inlineCode">=&gt;</span> for implication, and</li>
+                <li><span class="inlineCode">&lt;=&gt;</span> for biimplication.</li>
+              </ul>
+              Some examples for formulae are
+              <ul>
+                <li><span class="inlineCode">~A =&gt; B | (C &lt;=&gt; A)</span>
+                  which is equivalent to
+                  <span class="inlineCode">((~A) =&gt; (B | (C &lt;=&gt; A)))</span>,</li>
+                <li><span class="inlineCode">A &amp; B &amp; C =&gt; D</span>
+                  which is an example of a Horn-formula and equivalent to
+                  <span class="inlineCode">(A &amp; (B &amp; C)) =&gt; D</span>.
+              </ul>
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div class="jumbotron">
     <center>
-      <div id="input">
-        <label form="input" for="formulaTextInput">Formula:</label>
-        <input type="text" id="formulaTextInput" size="80"></input>
-        <button id="formulaButtonInput">Construct syntaxtree</input>
+      <label form="input" for="formulaTextInput">Formula:</label>
+      <div id="input" class="input-group">
+        <input type="text" id="formulaTextInput" size="60"></input>
+        <div class="input-group-append">
+          <button class="btn btn-primary" id="formulaButtonInput">Construct syntaxtree</button>
+        </div>
       </div>
       <div id="result" class="tf-tree">
       </div>
     </center>
+    <a class="rightlink btn nav-link" data-toggle="modal" data-target="#exampleModal">
+      Instructions
+    </a>
+  </div>
+
   </body>
-  <script src="syntaxtree.bundle.js"></script>
+  <!-- <script src="syntaxtree.bundle.js"></script> -->
 </html>
