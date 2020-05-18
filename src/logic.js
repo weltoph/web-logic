@@ -1,5 +1,5 @@
 class Variable {
-  name;
+  // name;
 
   constructor(name) {
     this.name = name;
@@ -37,7 +37,7 @@ class Model {
 }
 
 class Formula {
-  precedence = undefined;
+  // precedence = undefined;
 
   constructor() {
     if(this.constructor == Formula) {
@@ -63,7 +63,7 @@ class Formula {
 }
 
 class UnaryConnective extends Formula {
-  inner;
+  // inner;
 
   constructor(inner) {
     super();
@@ -87,8 +87,8 @@ class UnaryConnective extends Formula {
 }
 
 class BinaryConnective extends Formula {
-  left;
-  right;
+  // left;
+  // right;
 
   constructor(left, right) {
     super();
@@ -123,15 +123,13 @@ class BinaryConnective extends Formula {
   }
 
   toString() {
+    var leftStr = this.left.toString();
     if(this.requiresBracketsLeft()) {
-      const leftStr = "(" + this.left.toString() + ")";
-    } else {
-      const leftStr = this.left.toString();
+      leftStr = `(${leftStr})`
     }
+    var rightStr = this.right.toString();
     if(this.requiresBracketsRight()) {
-      const rightStr = "(" + this.right.toString() + ")";
-    } else {
-      const rightStr = this.right.toString();
+      rightStr = `(${rightStr})`;
     }
     return leftStr + this.symbol + rightStr;
   }
@@ -150,8 +148,11 @@ class BinaryConnective extends Formula {
 }
 
 class BiImplication extends BinaryConnective {
-  symbol = "<=>";
-  precedence = 0;
+  constructor(left, right) {
+    super(left, right);
+    this.symbol = "<=>";
+    this.precedence = 0;
+  }
 
   evaluate(model) {
     const leftResult = this.left.evaluate(model);
@@ -162,8 +163,11 @@ class BiImplication extends BinaryConnective {
 }
 
 class Implication extends BinaryConnective {
-  symbol = "=>";
-  precedence = 1;
+  constructor(left, right) {
+    super(left, right);
+    this.symbol = "=>";
+    this.precedence = 1;
+  }
 
   evaluate(model) {
     const leftResult = this.left.evaluate(model);
@@ -173,8 +177,11 @@ class Implication extends BinaryConnective {
 }
 
 class Disjunction extends BinaryConnective {
-  symbol = "|";
-  precedence = 2;
+  constructor(left, right) {
+    super(left, right);
+    this.symbol = "|";
+    this.precedence = 2;
+  }
 
   evaluate(model) {
     const leftResult = this.left.evaluate(model);
@@ -184,8 +191,11 @@ class Disjunction extends BinaryConnective {
 }
 
 class Conjunction extends BinaryConnective {
-  symbol = "&";
-  precedence = 3;
+  constructor(left, right) {
+    super(left, right);
+    this.symbol = "&";
+    this.precedence = 3;
+  }
 
   evaluate(model) {
     const leftResult = this.left.evaluate(model);
@@ -209,18 +219,17 @@ class Negation extends UnaryConnective {
   }
 
   toString() {
+    var innerStr = this.inner.toString();
     if(this.requiresBracketsInner()) {
-      const innerStr = "(" + this.inner.toString() + ")";
-    } else {
-      const innerStr = this.inner.toString();
+      innerStr = `(${innerStr})`;
     }
-    return "~" + innerStr;
+    return `~${innerStr}`;
   }
 }
 
 
 class Universal extends UnaryConnective {
-  variable;
+  // variable;
 
   constructor(variable, inner) {
     super(inner);
@@ -250,18 +259,16 @@ class Universal extends UnaryConnective {
   }
 
   toString() {
+    var innerStr = this.inner.toString();
     if(this.requiresBracketsInner()) {
-      const innerStr = "(" + this.inner.toString() + ")";
-    } else {
-      const innerStr = this.inner.toString();
+      innerStr = `(${innerStr})`
     }
-    const quantification = "! " + this.variable.name + ".";
-    return quantification + innerStr;
+    return `! ${this.variable.name}.${innerStr}`;
   }
 }
 
 class Existential extends UnaryConnective {
-  variable;
+  // variable;
 
   constructor(variable, inner) {
     super(inner);
@@ -291,13 +298,12 @@ class Existential extends UnaryConnective {
   }
 
   toString() {
+    var innerStr = this.inner.toString();
     if(this.requiresBracketsInner()) {
-      const innerStr = "(" + this.inner.toString() + ")";
-    } else {
-      const innerStr = this.inner.toString();
+      innerStr = `(${innerStr})`
     }
     const quantification = "? " + this.variable.name + ".";
-    return quantification + innerStr;
+    return `? ${this.variable.name}.${innerStr}`;
   }
 }
 
@@ -320,8 +326,8 @@ class Atom extends Formula {
 }
 
 class Predicate extends Atom {
-  name;
-  variables;
+  // name;
+  // variables;
 
   constructor(name, variables) {
     super();
@@ -346,8 +352,8 @@ class Predicate extends Atom {
 }
 
 class Equality extends Atom {
-  leftVariable;
-  rightVariable;
+  // leftVariable;
+  // rightVariable;
 
   constructor(leftVariable, rightVariable) {
     super();
@@ -371,7 +377,7 @@ class Equality extends Atom {
 }
 
 class Proposition extends Atom {
-  name;
+  // name;
 
   constructor(name) {
     super();
@@ -405,6 +411,99 @@ class PropositionValuation extends Model {
   }
 }
 
+const booleanFormulaInstructions = `
+  The Boolean connectives in descending order of precedence are
+  <ul>
+    <li><span class="code">~</span> for negation,</li>
+    <li><span class="code">&amp;</span> for conjunction,</li>
+    <li><span class="code">|</span> for disjunction,</li>
+    <li><span class="code">=&gt;</span> for implication, and</li>
+    <li><span class="code">&lt;=&gt;</span> for biimplication.</li>
+  </ul>
+  Some examples for formulae are
+  <ul>
+    <li><span class="code">~A =&gt; B | (C &lt;=&gt; A)</span>
+      which is equivalent to
+      <span class="code">((~A) =&gt; (B | (C &lt;=&gt; A)))</span>,</li>
+    <li><span class="code">A &amp; B &amp; C =&gt; D</span>
+      which is an example of a Horn-formula and equivalent to
+      <span class="code">(A &amp; (B &amp; C)) =&gt; D</span>.
+  </ul>`;
+
+function addFormulaInput(container, popupText, callbackFct) {
+  const addedBox = document.createElement("div");
+  addedBox.classList.add("formula-input-outer-container");
+
+  const inputText = document.createElement("input");
+  inputText.classList.add("formula-input-field");
+  inputText.type = "text";
+
+  const instructionModal = document.createElement("div");
+  instructionModal.classList.add("popup-box");
+
+  const instructionContent = document.createElement("div");
+  instructionContent.classList.add("popup-content");
+  instructionModal.appendChild(instructionContent);
+
+  const instructionClose = document.createElement("span");
+  instructionClose.classList.add("popup-box-close");
+  instructionClose.innerHTML = "&times;";
+  instructionContent.appendChild(instructionClose);
+
+  const instructionText = document.createElement("p");
+  instructionContent.appendChild(instructionText);
+
+  const buttonBox = document.createElement("div");
+  buttonBox.classList.add("formula-input-button-container");
+  const instructionBtn = document.createElement("button");
+  instructionBtn.innerText = "Instructions";
+  instructionBtn.addEventListener("click", () => {
+    instructionText.innerHTML = popupText;
+    instructionModal.style.display = "block";
+  });
+
+  instructionClose.addEventListener("click", () => {
+    instructionText.innerHTML = "";
+    instructionModal.style.display = "none";
+  });
+
+  const parseBtn = document.createElement("button");
+  parseBtn.innerText = "Go";
+  instructionBtn.classList.add("formula-input-btn");
+  parseBtn.classList.add("formula-input-btn");
+  buttonBox.appendChild(instructionBtn);
+  buttonBox.appendChild(parseBtn);
+  const computeInput = function(){
+    try {
+      callbackFct(inputText.value);
+    } catch(err) {
+      instructionText.innerHTML = err.message;
+      instructionModal.style.display = "block";
+      throw err;
+    }
+  };
+  parseBtn.addEventListener("click", computeInput);
+  inputText.addEventListener("keyup", event => {
+    if(event.keyCode === 13) {
+      event.preventDefault();
+      computeInput();
+    }
+  });
+
+  addedBox.appendChild(inputText);
+  addedBox.appendChild(buttonBox);
+
+  document.body.appendChild(instructionModal);
+  document.body.addEventListener("keyup", (event) => {
+    if(event.key === "Escape") {
+      if(instructionModal.style.display == "block") {
+        instructionModal.style.display = "none";
+      }
+    }
+  });
+  container.appendChild(addedBox);
+}
+
 module.exports = {
   Variable: Variable,
   Model: Model,
@@ -418,5 +517,7 @@ module.exports = {
   Predicate: Predicate,
   Equality: Equality,
   Proposition: Proposition,
-  PropositionValuation: PropositionValuation
+  PropositionValuation: PropositionValuation,
+  addFormulaInput: addFormulaInput,
+  booleanFormulaInstructions: booleanFormulaInstructions
 };

@@ -1,7 +1,8 @@
 .PHONY: build test
 
-test: $(wildcard src/*) $(wildcard dist/*.html) webpack.config.js
-	npm run test
-
-main: $(wildcard src/*) $(wildcard dist/*.html) webpack.config.js
+build: $(wildcard src/*) $(wildcard static/*) webpack.config.js test
 	npm run build
+	cp $(wildcard static/*) dist/
+
+test: $(wildcard src/*)
+	npm run test

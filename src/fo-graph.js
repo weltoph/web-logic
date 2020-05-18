@@ -1,13 +1,77 @@
-const parsers = require("./parsers.js");
+const parser = require("./parser.js");
 const Konva = require("konva");
 const logic = require("./logic.js");
 
 const stage = new Konva.Stage({
-  container: "input",
+  container: "canvas",
   width: window.innerWidth,
-  height: window.innerHeight - 600,
+  height: window.innerHeight - 200,
   visible: true,
 });
+
+const instructions = `
+  Create a simple colored graph by
+  <ul>
+    <li>creating nodes by double clicking the canvas,</li>
+    <li>coloring nodes by clicking them (the available color states are red,
+      blue, green and uncolored and clicking nodes cycles them through these
+      states), and</li>
+    <li>adding edges by dragging from one node to another.</li>
+  </ul>
+
+  Give a first-order sentence in the text box below which you can then
+  evaluate on your graph. The signature is
+  <ul>
+    <li><span class="code">E/2</span> which is instantiated with the
+      edge relation,</li>
+    <li><span class="code">=/2</span> which is equality (note that it
+      is used inline, i.e. <span class="code">x = y</span>),</li>
+    <li><span class="code">Red/1</span> which is the set of all red
+      nodes,</li>
+    <li><span class="code">Blue/1</span> which is the set of all blue
+      nodes, and</li>
+    <li><span class="code">Green/1</span> which is the set of all
+      green nodes.</li>
+  </ul>
+  Universal and existential quantifications are written as
+  <span class="code">!x. (...)</span> and
+  <span class="code">?x. (...)</span> respectively. Examples are
+  <ul>
+    <li>
+      <span class="code">
+        ? b . ( Blue(b) & ! o . ( ~ o = b => E(o, b) ) )
+      </span>
+      to describe that there is one blue node which is adjacent to all
+      others, and
+    </li>
+    <li>
+      <span class="code">
+        ! x . ( Blue(x) | ? y . (E(x, y) & Blue(y)))
+      </span>
+      to state that every node is either blue or adjacent to a blue node.
+    </li>
+  </ul>
+`;
+
+const inputDiv = document.getElementById("input");
+const resultDiv = document.getElementById("result");
+
+logic.addFormulaInput(inputDiv,
+  instructions,
+  (text) => {
+    const formula = parser.parseFirstOrder(text);
+    checkAtoms(formula);
+    const interpretation = extractInterpretation();
+    const result = formula.evaluate(interpretation);
+    resultDiv.innerHTML = `
+      <p>
+        The graph is ${result ? "" : "not"} a model of
+        <span class="code">
+          ${formula.toString()}
+        </span>.
+      </p>
+    `;
+  });
 
 const layer = new Konva.Layer();
 
@@ -166,11 +230,12 @@ function Interpretation(universe, edges) {
     return quantifiedInterpretations;
   };
   this.evaluateAtom = function(atom) {
-    if(atom.name === "=") {
-      [f, s] = atom.variableList;
+    if(atom instanceof logic.Equality) {
+      const f = atom.leftVariable;
+      const s = atom.rightVariable;
       return this.mapping[f.name] === this.mapping[s.name];
     } else if(atom.name === "E") {
-      [f, s] = atom.variableList;
+      [f, s] = atom.variables;
       if(!(f.name in this.mapping)) {
         throw {
           message: `Unbounded variable ${f.name} in ${atom.name}(${f.name}, ${s.name})`
@@ -191,7 +256,7 @@ function Interpretation(universe, edges) {
       }
       return false;
     } else {
-      [f] = atom.variableList;
+      [f] = atom.variables;
       if(!(f.name in this.mapping)) {
         throw {
           message: `Unbounded variable ${f.name} in ${atom.name}(${f.name})`
@@ -206,7 +271,7 @@ function Interpretation(universe, edges) {
         return fElement.color === "blue";
       } else {
         throw {
-          message: "Undefined predicate ${atom.name}/${atom.variableList.length}"
+          message: "Undefined predicate ${atom.name}/${atom.variables.length}"
         }
       }
     }
@@ -232,97 +297,27 @@ function checkAtoms(formula) {
       arity: 1,
     }
   ];
-  var allowedAtomsStrings = [];
-  for(const allowedAtom of allowedAtoms) {
-    allowedAtomsStrings.push(`${allowedAtom.name}/${allowedAtom.arity}`);
-  }
-  const helpString = allowedAtomsStrings.join(", ");
-  const atoms = logic.getAtoms(formula);
+  const helpString = allowedAtoms
+    .map(allowedAtom => {return `${allowedAtom.name}/${allowedAtom.arity}`;})
+    .join(", ");
+  const atoms = formula.getAtoms();
   for(const atom of atoms) {
-    const name = atom.name;
-    const arity = atom.variableList.length;
-    var isValid = false;
-    for(const allowedAtom of allowedAtoms) {
-      if(name === allowedAtom.name && arity === allowedAtom.arity) {
-        isValid = true;
-        break;
-      }
+    var arity;
+    var name;
+    if(atom instanceof logic.Predicate) {
+      name = atom.name;
+      arity = atom.variables.length;
+    } else if(atom instanceof logic.Equality) {
+      name = "=";
+      arity = 2;
+    } else {
+      throw new Error("Unexpected atom in formula.");
     }
-    if(isValid) {
-      continue;
+    const fitting = allowedAtoms.filter(allowedAtom => {
+      return allowedAtom.name === name && allowedAtom.arity === arity });
+    if(fitting.length === 0) {
+      throw new Error(
+        `Unknown predicate ${name}/${arity}. Only ${helpString} are allowed.`);
     }
-    return {
-      type: parsers.ParseResult.FAILURE,
-      message: `Unknown predicate ${name}/${arity}; only predicates ${helpString} are allowed`
-    };
-  }
-  return {
-    type: parsers.ParseResult.SUCCESS,
-    formula: formula
   }
 }
-
-
-function onConstructionButton() {
-  const textInput = document.getElementById("formulaTextInput");
-  const resultDiv = document.getElementById("result");
-  const formulaText = textInput.value;
-
-
-  function displayFailure(msg) {
-    resultDiv.classList.add("failure");
-
-    var innerText = msg.message;
-    if(msg.location) {
-      innerText += ` Check ${msg.location.start.column}-th character.`
-    }
-    resultDiv.appendChild(document.createTextNode(innerText));
-    console.warn(msg);
-  }
-
-  function displayResult(formulaText, result) {
-    resultDiv.classList.add("success");
-    const formulaSpan = document.createElement("span");
-    formulaSpan.classList.add("inlineCode");
-    formulaSpan.appendChild(document.createTextNode(formulaText));
-    const prefix = document.createTextNode("The formula ");
-    const middle = document.createTextNode(" evaluates to ");
-    const msg = document.createTextNode(result);
-    resultDiv.appendChild(prefix);
-    resultDiv.appendChild(formulaSpan);
-    resultDiv.appendChild(middle);
-    resultDiv.appendChild(msg);
-  }
-
-  /* clearing results: */
-  resultDiv.classList.remove("success");
-  resultDiv.classList.remove("failure");
-  resultDiv.textContent = "";
-
-  var result = parsers.parseFoFormula(formulaText);
-
-  if(result.type === parsers.ParseResult.FAILURE) {
-    displayFailure(result);
-    return;
-  }
-  result = checkAtoms(result.formula);
-
-  if(result.type === parsers.ParseResult.FAILURE) {
-    displayFailure(result);
-    return;
-  }
-
-  try {
-    const interpretation = extractInterpretation();
-    const evaluationResult = logic.evaluate(result.formula, interpretation);
-    displayResult(formulaText, evaluationResult);
-  } catch(err) {
-    displayFailure(err);
-    return;
-  }
-}
-
-/* formula stuff: */
-document.getElementById("formulaButtonInput").addEventListener("click", onConstructionButton);
-document.getElementById("formulaTextInput").addEventListener("keyup",
-  function(event) { if(event.keyCode === 13) { onConstructionButton(); } } );

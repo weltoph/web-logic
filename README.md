@@ -10,11 +10,11 @@ corresponding truthtable.
 
 ## Syntaxtree
 Given a propositional formula this applet displays the corresponding
-syntaxtree.
+syntax tree.
 
 ## FO-graph
-Via a simple interface a simple graph with three color classes can be
+Via a graphical interface a simple graph with three color classes can be
 constructed. The resulting graph structure can be used to evaluate FO-formulae.
 
 # Contributing
-With contributing you license your contributions under the MIT license.
+With contributing you agree to put your contributions under the MIT license.

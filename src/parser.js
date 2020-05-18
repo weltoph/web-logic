@@ -52,7 +52,7 @@ atom = alone:predicate { return alone; }
      / alone:quantification { return alone; }
      / "(" ws alone:formula ws ")" { return alone; }
 
-predicate = name:[a-zA-Z]+ "(" ws variableList:variableList ws ")" { return new logic.predicate(name.join(""), variableList); }
+predicate = name:[a-zA-Z]+ "(" ws variableList:variableList ws ")" { return new logic.Predicate(name.join(""), variableList); }
           / f:variable ws "=" ws s:variable { return new logic.Equality(f, s); }
 quantification = "!" ws quantifiedVariable:variable ws "." ws inner:negation { return new logic.Universal(quantifiedVariable, inner); }
                / "?" ws quantifiedVariable:variable ws "." ws inner:negation { return new logic.Existential(quantifiedVariable, inner); }

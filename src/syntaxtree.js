@@ -1,5 +1,16 @@
-const parsers = require("./parsers.js");
+const parser = require("./parser.js");
 const logic = require("./logic.js");
+
+const resultDiv = document.getElementById("result");
+const inputDiv = document.getElementById("input");
+
+logic.addFormulaInput(inputDiv, logic.booleanFormulaInstructions,
+  (text) => {
+    const formula = parser.parsePropositional(text);
+    const tree = createSyntaxtree(formula);
+    resultDiv.innerHTML = "";
+    resultDiv.appendChild(tree);
+  });
 
 function createSyntaxtree(formula) {
   const node = document.createElement("li");
@@ -7,62 +18,25 @@ function createSyntaxtree(formula) {
   contentSpan.classList.add("tf-nc");
 
   const children = document.createElement("ul");
-  if(logic.FormulaType.binary.includes(formula.type)) {
+  if(formula instanceof logic.BiImplication
+    || formula instanceof logic.Implication
+    || formula instanceof logic.Disjunction
+    || formula instanceof logic.Conjunction) {
     const leftTree = createSyntaxtree(formula.left);
     const rightTree = createSyntaxtree(formula.right);
     children.appendChild(leftTree);
     children.appendChild(rightTree);
-    contentSpan.appendChild(
-      document.createTextNode(
-        logic.FormulaType.getFormulaConnective(formula.type)));
-  } else if(formula.type === logic.FormulaType.NEGATION) {
+    contentSpan.appendChild(document.createTextNode(formula.symbol));
+  } else if(formula instanceof logic.Negation) {
     const innerTree = createSyntaxtree(formula.innerFormula);
     children.appendChild(innerTree);
-    contentSpan.appendChild(
-      document.createTextNode(
-        logic.FormulaType.getFormulaConnective(formula.type)));
-  } else if(formula.type === logic.FormulaType.ATOM) {
-    contentSpan.appendChild(
-      document.createTextNode(
-        formula.name));
+    contentSpan.appendChild(document.createTextNode("~"));
+  } else if(formula instanceof logic.Proposition) {
+    contentSpan.appendChild(document.createTextNode(formula.name));
   }
   node.appendChild(contentSpan);
-  if(formula.type !== logic.FormulaType.ATOM) {
+  if(!(formula instanceof logic.Proposition)) {
     node.appendChild(children);
   }
   return node;
 }
-
-function onConstructionButton() {
-  const textInput = document.getElementById("formulaTextInput");
-  const resultDiv = document.getElementById("result");
-  const formulaText = textInput.value;
-  const result = parsers.parsePlFormula(formulaText);
-
-  /* clearing results: */
-  resultDiv.classList.remove("success");
-  resultDiv.classList.remove("failure");
-  for(const element of resultDiv.childNodes) {
-    element.remove();
-  };
-  if(result.type === parsers.ParseResult.SUCCESS) {
-    resultDiv.classList.add("success");
-    const resultingTree = document.createElement("ul");
-    const syntaxTree = createSyntaxtree(result.formula);
-    resultingTree.appendChild(syntaxTree);
-    resultDiv.appendChild(resultingTree);
-  } else if(result.type === parsers.ParseResult.FAILURE) {
-    const span = document.createElement("span");
-    const innerText = `${result.message} Check ${result.location.start.column}-th character.`
-    resultDiv.classList.add("failure");
-    resultDiv.appendChild(document.createTextNode(innerText));
-    console.warn(result);
-  } else {
-    /* */
-  }
-};
-
-/* register functions: */
-document.getElementById("formulaButtonInput").addEventListener("click", onConstructionButton);
-document.getElementById("formulaTextInput").addEventListener("keyup",
-  function(event) { if(event.keyCode === 13) { onConstructionButton(); } } );
