@@ -1,8 +1,13 @@
 .PHONY: build test
 
-build: $(wildcard src/*) $(wildcard static/*) webpack.config.js test
+SCRIPTFILES=$(wildcard src/*)
+STATICFILES=$(wildcard static/*)
+CONFIGFILES=webpack.config.js
+
+build: ${SCRIPTFILES} ${STATICFILES} ${CONFIGFILES} test
+	mkdir -p dist
 	npm run build
 	cp $(wildcard static/*) dist/
 
-test: $(wildcard src/*)
+test: ${SCRIPTFILES}
 	npm run test
