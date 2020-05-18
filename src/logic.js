@@ -445,7 +445,7 @@ function addFormulaInput(container, popupText, callbackFct) {
   instructionContent.classList.add("popup-content");
   instructionModal.appendChild(instructionContent);
 
-  const instructionClose = document.createElement("span");
+  const instructionClose = document.createElement("button");
   instructionClose.classList.add("popup-box-close");
   instructionClose.innerHTML = "&times;";
   instructionContent.appendChild(instructionClose);
