@@ -28,7 +28,7 @@ function createSyntaxtree(formula) {
     children.appendChild(rightTree);
     contentSpan.appendChild(document.createTextNode(formula.symbol));
   } else if(formula instanceof logic.Negation) {
-    const innerTree = createSyntaxtree(formula.innerFormula);
+    const innerTree = createSyntaxtree(formula.inner);
     children.appendChild(innerTree);
     contentSpan.appendChild(document.createTextNode("~"));
   } else if(formula instanceof logic.Proposition) {

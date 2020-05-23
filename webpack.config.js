@@ -16,7 +16,7 @@ module.exports = [
       path: path.resolve(__dirname, 'dist'),
     },
   }, {
-    entry: index: './src/fo-graph.js',
+    entry: './src/fo-graph.js',
     mode: "production",
     output: {
       filename: 'fo-graph.bundle.js',
