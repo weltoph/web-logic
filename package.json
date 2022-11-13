@@ -14,7 +14,7 @@
     "jest": "^26.0.1",
     "pegjs": "^0.10.0",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "konva": "^4.2.2"
